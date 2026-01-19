@@ -1,0 +1,72 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
+# Python logs and databases
+*.log
+*.sqlite
+*.db
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# MuJoCo/Simulation related
+*.mjcf~
+logs/
+recordings/
+videos/
+*.mp4
+*.avi
+
+# Model checkpoints (but keep the required policy files)
+checkpoints/
+runs/
+wandb/
+
+# OS specific
+Thumbs.db
+desktop.ini
+
+# Temporary files
+*.tmp
+*.bak
+tmp/
+temp/

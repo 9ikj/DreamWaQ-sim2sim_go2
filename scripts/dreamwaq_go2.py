@@ -20,12 +20,12 @@ def pd_control(kps, target_q, q, kds, target_dq, dq):
     return output
 
 class Sim2simCfg:
-    policy_root = "../policies/dreamwaq/go2/policy_dwaq.pt"
+    policy_root = "./policies/dreamwaq/go2/policy_dwaq.pt"
 
     whole_policy = torch.jit.load(policy_root)
 
     class sim_config:
-        mujoco_model_path = "../robotics/go2/scene_terrain.xml"
+        mujoco_model_path = "./robotics/go2/scene_terrain.xml"
         dt = 0.005
         decimation = 4
 
