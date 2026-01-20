@@ -4,6 +4,6 @@ echo GO2 Web Visualizer - 启动中...
 echo ========================================
 echo.
 
-python start_all.py
+.venv\Scripts\activate && python start_all.py
 
 pause
