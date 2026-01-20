@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GO2 Web Visualizer - 机器人控制</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.178.0/three.module.js"
+        }
+    }
+    </script>
+
+    <style>
+        @keyframes pulse-status {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .status-indicator {
+            animation: pulse-status 2s infinite;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f0f23;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #0f3460;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #53a8b6;
+        }
+        #app-container {
+            position: relative;
+        }
+        #control-sidebar {
+            position: absolute;
+            right: 0;
+            top: 0;
+            height: 100%;
+            width: 400px;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            z-index: 40;
+        }
+        #control-sidebar.collapsed {
+            transform: translateX(100%);
+            opacity: 0;
+            pointer-events: none;
+        }
+        #toggle-sidebar-btn {
+            transition: right 0.3s ease, background 0.2s ease, transform 0.2s ease;
+        }
+        #toggle-sidebar-btn:not(.sidebar-visible) {
+            right: 16px;
+        }
+        #toggle-sidebar-btn.sidebar-visible {
+            right: 416px;
+        }
+        #toggle-sidebar-btn:hover {
+            background: #e94560;
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body class="m-0 p-0 overflow-hidden bg-[#0f0f23] text-gray-200 font-sans">
+    <div id="app-container" class="flex w-screen h-screen relative">
+        <!-- Left: 3D Canvas -->
+        <div id="canvas-container" class="flex-1 relative bg-gradient-to-br from-[#1a1a2e] to-[#16213e]">
+            <!-- Sidebar Toggle Button -->
+            <button
+                id="toggle-sidebar-btn"
+                class="fixed top-4 z-50 w-12 h-12 bg-[#16213e] hover:bg-[#e94560] border-2 border-[#0f3460] rounded-lg shadow-xl flex items-center justify-center cursor-pointer sidebar-visible"
+                title="切换侧边栏"
+                onclick="window.toggleSidebar()"
+            >
+                <svg id="sidebar-icon" class="w-6 h-6 text-[#53a8b6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Right: Control Sidebar -->
+        <div id="control-sidebar" class="bg-[#16213e] border-l-2 border-[#0f3460] overflow-y-auto flex flex-col shadow-2xl py-2">
+
+            <!-- Connection Status -->
+            <div id="connection-status" class="mx-3 my-2 px-4 py-2 rounded-md font-semibold text-sm text-center flex items-center justify-center gap-2 bg-red-900/20 border-2 border-red-500 text-red-500">
+                <span class="status-indicator w-3 h-3 rounded-full bg-red-500 inline-block"></span>
+                连接中...
+            </div>
+
+            <!-- Performance Monitor -->
+            <div class="mx-3 my-2 p-3 bg-[#1a1a2e] rounded-md border border-[#0f3460]">
+                <h3 class="text-[#e94560] text-sm font-semibold mb-2 flex items-center gap-2">📈 性能</h3>
+
+                <div id="fps-display" class="flex justify-between items-center py-2 border-b border-[#2a2a3e]">
+                    <span class="text-gray-400 text-xs">渲染帧率:</span>
+                    <span class="perf-value font-mono text-sm font-bold text-green-400">--</span>
+                </div>
+
+                <div id="state-hz-display" class="flex justify-between items-center py-2 border-b border-[#2a2a3e]">
+                    <span class="text-gray-400 text-xs">状态更新:</span>
+                    <span class="perf-value font-mono text-sm font-bold text-green-400">-- Hz</span>
+                </div>
+
+                <div id="latency-display" class="flex justify-between items-center py-2">
+                    <span class="text-gray-400 text-xs">延迟:</span>
+                    <span class="perf-value font-mono text-sm font-bold text-green-400">-- ms</span>
+                </div>
+            </div>
+
+            <!-- Robot State Display -->
+            <div class="mx-3 my-2 p-3 bg-[#1a1a2e] rounded-md border border-[#0f3460]">
+                <h3 class="text-[#e94560] text-sm font-semibold mb-2 flex items-center gap-2">📊 机器人状态</h3>
+
+                <!-- Joint Angles Table -->
+                <div class="max-h-[200px] overflow-y-auto mb-2">
+                    <table id="joint-table" class="w-full border-collapse text-[11px]">
+                        <thead class="sticky top-0 bg-[#0f3460] z-10">
+                            <tr>
+                                <th class="px-2 py-1.5 text-left text-[#53a8b6] font-semibold border-b-2 border-[#e94560]">关节</th>
+                                <th class="px-2 py-1.5 text-left text-[#53a8b6] font-semibold border-b-2 border-[#e94560]">角度</th>
+                                <th class="px-2 py-1.5 text-left text-[#53a8b6] font-semibold border-b-2 border-[#e94560]">速度</th>
+                            </tr>
+                        </thead>
+                        <tbody id="joint-table-body">
+                            <tr>
+                                <td colspan="3" class="loading text-center text-gray-500 italic py-2">等待数据...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Base State -->
+                <div id="base-state" class="text-[11px]">
+                    <div class="loading text-center text-gray-500 italic py-2">等待数据...</div>
+                </div>
+            </div>
+
+            <!-- Control Panel -->
+            <div class="mx-3 my-2 p-3 bg-[#1a1a2e] rounded-md border border-[#0f3460]">
+                <h3 class="text-[#e94560] text-sm font-semibold mb-2 flex items-center gap-2">🎮 控制</h3>
+
+                <!-- Keyboard Legend -->
+                <div class="grid grid-cols-2 gap-1.5 mb-2">
+                    <div class="legend-item flex items-center gap-2 px-2 py-1.5 bg-[#0f0f23] rounded border border-[#2a2a3e] transition-all duration-200" data-key="w">
+                        <span class="key-label min-w-[30px] px-1 py-1 bg-gradient-to-br from-[#0f3460] to-[#16213e] rounded text-center font-bold text-[#53a8b6] border border-[#53a8b6] text-[11px]">W</span>
+                        <span class="key-desc text-[11px] text-gray-400">前进</span>
+                    </div>
+                    <div class="legend-item flex items-center gap-2 px-2 py-1.5 bg-[#0f0f23] rounded border border-[#2a2a3e] transition-all duration-200" data-key="s">
+                        <span class="key-label min-w-[30px] px-1 py-1 bg-gradient-to-br from-[#0f3460] to-[#16213e] rounded text-center font-bold text-[#53a8b6] border border-[#53a8b6] text-[11px]">S</span>
+                        <span class="key-desc text-[11px] text-gray-400">后退</span>
+                    </div>
+                    <div class="legend-item flex items-center gap-2 px-2 py-1.5 bg-[#0f0f23] rounded border border-[#2a2a3e] transition-all duration-200" data-key="a">
+                        <span class="key-label min-w-[30px] px-1 py-1 bg-gradient-to-br from-[#0f3460] to-[#16213e] rounded text-center font-bold text-[#53a8b6] border border-[#53a8b6] text-[11px]">A</span>
+                        <span class="key-desc text-[11px] text-gray-400">左移</span>
+                    </div>
+                    <div class="legend-item flex items-center gap-2 px-2 py-1.5 bg-[#0f0f23] rounded border border-[#2a2a3e] transition-all duration-200" data-key="d">
+                        <span class="key-label min-w-[30px] px-1 py-1 bg-gradient-to-br from-[#0f3460] to-[#16213e] rounded text-center font-bold text-[#53a8b6] border border-[#53a8b6] text-[11px]">D</span>
+                        <span class="key-desc text-[11px] text-gray-400">右移</span>
+                    </div>
+                    <div class="legend-item flex items-center gap-2 px-2 py-1.5 bg-[#0f0f23] rounded border border-[#2a2a3e] transition-all duration-200" data-key="q">
+                        <span class="key-label min-w-[30px] px-1 py-1 bg-gradient-to-br from-[#0f3460] to-[#16213e] rounded text-center font-bold text-[#53a8b6] border border-[#53a8b6] text-[11px]">Q</span>
+                        <span class="key-desc text-[11px] text-gray-400">左转</span>
+                    </div>
+                    <div class="legend-item flex items-center gap-2 px-2 py-1.5 bg-[#0f0f23] rounded border border-[#2a2a3e] transition-all duration-200" data-key="e">
+                        <span class="key-label min-w-[30px] px-1 py-1 bg-gradient-to-br from-[#0f3460] to-[#16213e] rounded text-center font-bold text-[#53a8b6] border border-[#53a8b6] text-[11px]">E</span>
+                        <span class="key-desc text-[11px] text-gray-400">右转</span>
+                    </div>
+                </div>
+
+                <!-- Active Keys -->
+                <div class="mt-2 pt-2 border-t border-[#2a2a3e]">
+                    <h4 class="text-[#53a8b6] text-xs font-semibold mb-1.5">当前按键:</h4>
+                    <div id="active-keys" class="min-h-[30px] flex flex-wrap gap-1.5">
+                        <div class="no-keys text-gray-500 italic text-xs py-1.5">未按下任何键</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Messages Overlay -->
+    <div id="status-message" class="fixed top-5 left-1/2 -translate-x-1/2 z-[1000] max-w-[500px] px-8 py-5 rounded-lg shadow-2xl hidden"></div>
+
+    <!-- Three.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/three/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three/examples/js/loaders/OBJLoader.js"></script>
+
+    <!-- Application Scripts -->
+    <script src="/static/js/websocket_client.js"></script>
+    <script src="/static/js/keyboard_handler.js"></script>
+    <script src="/static/js/ui_controller.js"></script>
+    <script type="module" src="/static/js/robot_renderer.js"></script>
+    <script src="/static/js/main.js"></script>
+
+    <!-- Sidebar Toggle Script -->
+    <script>
+        window.toggleSidebar = function() {
+            const sidebar = document.getElementById('control-sidebar');
+            const button = document.getElementById('toggle-sidebar-btn');
+            const icon = document.getElementById('sidebar-icon');
+
+            sidebar.classList.toggle('collapsed');
+            button.classList.toggle('sidebar-visible');
+
+            const isVisible = button.classList.contains('sidebar-visible');
+            if (isVisible) {
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path>';
+            } else {
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path>';
+            }
+        };
+    </script>
+</body>
+</html>

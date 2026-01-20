@@ -5,7 +5,8 @@
       "Bash(python scripts/dreamwaq_go2.py:*)",
       "Bash(call conda.bat activate go2)",
       "Bash(conda run:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(python scripts/dreamwaq_go2_web.py:*)"
     ]
   }
 }
