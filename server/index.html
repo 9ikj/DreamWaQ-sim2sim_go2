@@ -145,6 +145,21 @@
             <div class="mx-3 my-2 p-3 bg-[#1a1a2e] rounded-md border border-[#0f3460]">
                 <h3 class="text-[#e94560] text-sm font-semibold mb-2 flex items-center gap-2">🎮 控制</h3>
 
+                <!-- Gamepad Status -->
+                <div class="mb-3 p-2 bg-[#0f0f23] rounded border border-[#2a2a3e]">
+                    <h4 class="text-[#53a8b6] text-xs font-semibold mb-2">游戏手柄</h4>
+                    <div id="gamepad-connection" class="mb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-gray-600"></span>
+                            <span class="text-xs text-gray-500">未连接</span>
+                        </div>
+                        <div class="text-[10px] text-gray-600 mt-1">请连接游戏手柄</div>
+                    </div>
+                    <div id="gamepad-status" class="text-xs text-gray-500 italic">
+                        等待手柄输入...
+                    </div>
+                </div>
+
                 <!-- Keyboard Legend -->
                 <div class="grid grid-cols-2 gap-1.5 mb-2">
                     <div class="legend-item flex items-center gap-2 px-2 py-1.5 bg-[#0f0f23] rounded border border-[#2a2a3e] transition-all duration-200" data-key="w">
@@ -195,6 +210,7 @@
     <!-- Application Scripts -->
     <script src="/static/js/websocket_client.js"></script>
     <script src="/static/js/keyboard_handler.js"></script>
+    <script src="/static/js/gamepad_handler.js"></script>
     <script src="/static/js/ui_controller.js"></script>
     <script type="module" src="/static/js/robot_renderer.js"></script>
     <script src="/static/js/main.js"></script>

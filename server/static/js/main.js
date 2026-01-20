@@ -6,6 +6,7 @@
 let wsClient;
 let renderer;
 let keyboard;
+let gamepad;
 let uiController;
 let isInitialized = false;
 
@@ -37,7 +38,12 @@ async function init() {
         console.log('[Init] Setting up keyboard handler...');
         keyboard = new KeyboardHandler(wsClient);
 
-        // 5. Connect WebSocket state updates to renderer and UI
+        // 5. Initialize Gamepad Handler
+        console.log('[Init] Setting up gamepad handler...');
+        gamepad = new GamepadHandler(wsClient);
+        window.gamepad = gamepad;
+
+        // 6. Connect WebSocket state updates to renderer and UI
         wsClient.onStateUpdate((state) => {
             renderer.updateRobotState(state);
             uiController.updateStateDisplay(state);
@@ -50,9 +56,14 @@ async function init() {
         console.log('='.repeat(60));
         console.log('');
         console.log('Controls:');
-        console.log('  W/S or ↑/↓  - Forward/Backward');
-        console.log('  A/D or ←/→  - Left/Right');
-        console.log('  Q/E         - Rotate');
+        console.log('  Keyboard:');
+        console.log('    W/S or ↑/↓  - Forward/Backward');
+        console.log('    A/D or ←/→  - Left/Right');
+        console.log('    Q/E         - Rotate');
+        console.log('');
+        console.log('  Gamepad:');
+        console.log('    Left Stick  - Forward/Backward & Left/Right');
+        console.log('    Right Stick - Rotate');
         console.log('');
         console.log('WebSocket:', wsUrl);
         console.log('='.repeat(60));
@@ -80,7 +91,8 @@ function showWelcomeMessage() {
         messageElement.innerHTML = `
             <div class="bg-green-500/95 text-white border-2 border-green-400 rounded-lg p-6 text-center">
                 <h3 class="text-xl font-bold mb-2">🤖 GO2 Web Visualizer</h3>
-                <p class="text-sm mb-1">已连接！使用 WASD 或方向键控制机器人。</p>
+                <p class="text-sm mb-1">已连接！使用键盘或游戏手柄控制机器人。</p>
+                <p class="text-xs mt-2 opacity-80">键盘: WASD/方向键 | 手柄: 左摇杆移动, 右摇杆旋转</p>
             </div>
         `;
         messageElement.classList.remove('hidden');

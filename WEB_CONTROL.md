@@ -59,10 +59,31 @@ You should see:
 
 ## Controls
 
+### Keyboard Control
 Use keyboard in the **web browser** (not MuJoCo viewer):
-- **Arrow Up/Down**: Move forward/backward
-- **Arrow Left/Right**: Strafe left/right
+- **W/S or Arrow Up/Down**: Move forward/backward
+- **A/D or Arrow Left/Right**: Strafe left/right
 - **Q/E**: Rotate left/right
+
+### Gamepad Control
+Connect any standard gamepad (Xbox, PlayStation, etc.) to your computer:
+- **Left Stick**:
+  - Y-axis: Move forward/backward
+  - X-axis: Strafe left/right
+- **Right Stick**:
+  - X-axis: Rotate left/right
+
+**Features:**
+- Automatic detection when gamepad is connected/disconnected
+- Dead zone filtering to prevent drift (15% default)
+- Real-time status display in the control panel
+- Smooth analog control with configurable sensitivity
+
+**Supported Gamepads:**
+- Xbox One/Series controllers
+- PlayStation 4/5 DualShock/DualSense controllers
+- Generic USB gamepads with standard mapping
+- Most Bluetooth game controllers
 
 ## Data Flow
 
