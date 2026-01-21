@@ -35,7 +35,7 @@ class Sim2simCfg:
     whole_policy = torch.jit.load(policy_root)
 
     class sim_config:
-        mujoco_model_path = "./robotics/go2/scene_terrain.xml"
+        mujoco_model_path = "./robotics/go2/scene_wutaishan.xml"
         dt = 0.005
         decimation = 4
 
