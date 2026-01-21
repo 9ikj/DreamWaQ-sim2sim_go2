@@ -1,9 +1,10 @@
 /**
- * GO2 Robot 3D Renderer
+ * GO2 Robot 3D Renderer with Gaussian Splatting
  * Renders GO2 quadruped robot using Three.js with OBJ meshes
  */
 
 import * as THREE from 'three';
+import { SplatMesh } from '@sparkjsdev/spark';
 
 class RobotRenderer {
     constructor(containerId) {
@@ -75,23 +76,23 @@ class RobotRenderer {
     }
 
     setupGround() {
-        // Ground plane
-        const groundGeometry = new THREE.PlaneGeometry(20, 20);
-        const groundMaterial = new THREE.MeshStandardMaterial({
-            color: 0x16213e,
-            roughness: 0.8,
-            metalness: 0.2
-        });
-        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
-        ground.rotation.x = -Math.PI / 2;
-        ground.receiveShadow = true;
-        this.scene.add(ground);
+        // Ground plane (commented out - using Gaussian Splatting environment instead)
+        // const groundGeometry = new THREE.PlaneGeometry(20, 20);
+        // const groundMaterial = new THREE.MeshStandardMaterial({
+        //     color: 0x16213e,
+        //     roughness: 0.8,
+        //     metalness: 0.2
+        // });
+        // const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        // ground.rotation.x = -Math.PI / 2;
+        // ground.receiveShadow = true;
+        // this.scene.add(ground);
 
-        // Grid helper
-        const gridHelper = new THREE.GridHelper(20, 40, 0x0f3460, 0x0f3460);
-        gridHelper.material.opacity = 0.3;
-        gridHelper.material.transparent = true;
-        this.scene.add(gridHelper);
+        // Grid helper (commented out - not needed with Gaussian Splatting environment)
+        // const gridHelper = new THREE.GridHelper(20, 40, 0x0f3460, 0x0f3460);
+        // gridHelper.material.opacity = 0.3;
+        // gridHelper.material.transparent = true;
+        // this.scene.add(gridHelper);
     }
 
     async loadRobotModel() {
@@ -263,8 +264,51 @@ class RobotRenderer {
         this.renderer.setSize(width, height);
     }
 
+    async loadSplatScene(spzPath) {
+        console.log('[Renderer] Loading Gaussian Splatting environment scene:', spzPath);
+
+        try {
+            // Create SplatMesh instance
+            const splatMesh = new SplatMesh({ url: spzPath });
+
+            // Set position and rotation
+            // Adjust Y coordinate (height) to align with robot: 0 = ground level, negative = lower, positive = higher
+            let splatPosY = 0.6;
+            splatMesh.position.set(0, splatPosY, 0);  // X, Y(height), Z
+            splatMesh.quaternion.set(1, 0, 0, 0);  // Identity rotation
+
+            // Set scale (adjust to enlarge/shrink the scene)
+            // 1.0 = original size, 2.0 = double size, 0.5 = half size
+            let sceneScale = 1;
+            splatMesh.scale.set(sceneScale, sceneScale, sceneScale);  // X, Y, Z scale
+
+            // Add to scene
+            this.scene.add(splatMesh);
+
+            console.log('[Renderer] Gaussian Splatting environment scene loaded successfully');
+            return splatMesh;
+
+        } catch (error) {
+            console.error('[Renderer] Error loading Gaussian Splat scene:', error);
+            throw error;  // Let main.js handle the error
+        }
+    }
+
     dispose() {
         console.log('[Renderer] Disposing resources...');
+
+        // Dispose splat scene (if loaded)
+        // Note: SplatMesh is stored in scene, traverse to find and dispose
+        this.scene.traverse((child) => {
+            if (child.constructor.name === 'SplatMesh') {
+                this.scene.remove(child);
+                if (child.dispose) {
+                    child.dispose();
+                }
+            }
+        });
+
+        // Dispose robot meshes
         for (const [name, group] of Object.entries(this.bodyMeshes)) {
             group.traverse((child) => {
                 if (child.geometry) child.geometry.dispose();

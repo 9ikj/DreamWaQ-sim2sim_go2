@@ -31,6 +31,15 @@ async function init() {
         renderer = new RobotRenderer('canvas-container');
         window.renderer = renderer;
 
+        // Load Gaussian Splatting environment scene (before robot)
+        try {
+            await renderer.loadSplatScene('/static/models/environment.spz');
+            console.log('[Init] Environment scene loaded');
+        } catch (error) {
+            console.warn('[Init] Failed to load environment scene (non-critical):', error);
+            // Continue loading robot even if environment fails
+        }
+
         // Load robot model
         await renderer.loadRobotModel();
 
