@@ -10,7 +10,8 @@
       "Bash(python:*)",
       "Bash(pip show:*)",
       "Bash(.venvScriptspip.exe show:*)",
-      "Bash(.venvScriptspip.exe list:*)"
+      "Bash(.venvScriptspip.exe list:*)",
+      "Bash(tree:*)"
     ]
   }
 }

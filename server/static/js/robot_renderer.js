@@ -168,7 +168,7 @@ class RobotRenderer {
 
     async loadObjToGroup(meshName, group, material) {
         return new Promise((resolve) => {
-            const path = `/assets/${meshName}.obj`;
+            const path = `/static/models/go2/${meshName}.obj`;
 
             this.objLoader.load(
                 path,
