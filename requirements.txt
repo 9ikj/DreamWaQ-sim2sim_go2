@@ -1,0 +1,26 @@
+# Core dependencies for DreamWaQ Go2 simulation
+# Physics simulation
+mujoco==3.2.7
+
+# Deep learning
+torch>=2.0.0
+# Note: For CUDA support, install with: pip install torch --index-url https://download.pytorch.org/whl/cu118
+
+# Numerical computing
+numpy>=1.24.0
+scipy>=1.10.0
+
+# Input handling (for keyboard control)
+pynput>=1.7.6
+
+# Web control dependencies (optional, only needed for web interface)
+# Install with: pip install -r requirements.txt
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+websockets>=12.0
+
+# Legacy dependencies (not used in main scripts, only in utils/ legacy code)
+# Uncomment if you need to use legacy utilities:
+# pygame>=2.0.0
+# matplotlib>=3.5.0
+# pinocchio>=2.6.0

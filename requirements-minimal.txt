@@ -1,0 +1,14 @@
+# Minimal dependencies for DreamWaQ Go2 simulation (keyboard control only)
+# Physics simulation
+mujoco==3.2.7
+
+# Deep learning
+torch>=2.0.0
+# Note: For CUDA support, install with: pip install torch --index-url https://download.pytorch.org/whl/cu118
+
+# Numerical computing
+numpy>=1.24.0
+scipy>=1.10.0
+
+# Input handling (for keyboard control)
+pynput>=1.7.6
