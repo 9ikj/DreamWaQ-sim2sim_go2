@@ -1,6 +1,7 @@
 import asyncio
 import websockets
 import json
+import time
 from typing import Optional, Callable
 import threading
 
@@ -50,13 +51,17 @@ class WebSocketBridge:
                 self.websocket = None
                 await asyncio.sleep(1)
 
-    def send_state(self, base_pos, base_quat, joint_pos):
+    def send_state(self, base_pos, base_quat, joint_pos, joint_vel=None):
         if self.websocket and self.loop:
             msg = {
                 "type": "state",
+                "timestamp": int(time.time() * 1000),
                 "base_pos": base_pos.tolist(),
                 "base_quat": base_quat.tolist(),
-                "joint_pos": joint_pos.tolist()
+                "joint_pos": joint_pos.tolist(),
+                "joint_vel": joint_vel.tolist() if joint_vel is not None else [0.0] * 12,
+                "joint_names": ["FL_hip", "FL_thigh", "FL_calf", "FR_hip", "FR_thigh", "FR_calf",
+                                "RL_hip", "RL_thigh", "RL_calf", "RR_hip", "RR_thigh", "RR_calf"]
             }
             asyncio.run_coroutine_threadsafe(
                 self.websocket.send(json.dumps(msg)),

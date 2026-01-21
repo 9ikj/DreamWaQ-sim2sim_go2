@@ -11,7 +11,9 @@
       "Bash(pip show:*)",
       "Bash(.venvScriptspip.exe show:*)",
       "Bash(.venvScriptspip.exe list:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)"
     ]
   }
 }

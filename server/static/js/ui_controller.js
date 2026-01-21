@@ -105,7 +105,7 @@ class UIController {
 
         // Update joint table
         if (state.joint_pos && state.joint_names) {
-            this.updateJointTable(state.joint_names, state.joint_pos);
+            this.updateJointTable(state.joint_names, state.joint_pos, state.joint_vel);
         }
 
         // Update base state
@@ -114,18 +114,20 @@ class UIController {
         }
     }
 
-    updateJointTable(jointNames, jointPos) {
+    updateJointTable(jointNames, jointPos, jointVel) {
         const tbody = document.getElementById('joint-table-body');
         if (!tbody) return;
 
         let html = '';
         for (let i = 0; i < jointNames.length && i < jointPos.length; i++) {
             const angle = (jointPos[i] * 180 / Math.PI).toFixed(1);
+            // 将弧度/秒转换为度/秒，并保留1位小数
+            const vel = jointVel && jointVel[i] !== undefined ? (jointVel[i] * 180 / Math.PI).toFixed(1) : '--';
             html += `
                 <tr class="border-b border-[#2a2a3e] hover:bg-[#0f3460]/30">
                     <td class="px-2 py-1 text-gray-300">${jointNames[i]}</td>
                     <td class="px-2 py-1 font-mono text-[#53a8b6]">${angle}°</td>
-                    <td class="px-2 py-1 font-mono text-gray-400">--</td>
+                    <td class="px-2 py-1 font-mono text-gray-400">${vel}°/s</td>
                 </tr>
             `;
         }

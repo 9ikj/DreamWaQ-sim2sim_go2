@@ -145,7 +145,8 @@ def run_mujoco(cfg: Sim2simCfg):
                 # Send state to web clients
                 base_pos = data.qpos[0:3]
                 base_quat = data.qpos[3:7]
-                ws_bridge.send_state(base_pos, base_quat, qj)
+                joint_vel = data.qvel[6:18]  # 12个关节速度
+                ws_bridge.send_state(base_pos, base_quat, qj[:12], joint_vel)
 
             tau = pd_control(cfg.robot_config.kps, target_q, qj,
                              cfg.robot_config.kds, target_vel, dqj)
