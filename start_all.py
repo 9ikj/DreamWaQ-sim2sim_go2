@@ -24,11 +24,7 @@ def main():
         print("\n[1/2] 启动WebSocket服务器...")
         server_process = subprocess.Popen(
             [sys.executable, "server/websocket_server.py"],
-            env=env,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            bufsize=1
+            env=env
         )
         processes.append(("WebSocket服务器", server_process))
         time.sleep(2)  # 等待服务器启动
@@ -37,11 +33,7 @@ def main():
         print("[2/2] 启动仿真程序...")
         sim_process = subprocess.Popen(
             [sys.executable, "scripts/dreamwaq_go2_web.py"],
-            env=env,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            bufsize=1
+            env=env
         )
         processes.append(("仿真程序", sim_process))
 
